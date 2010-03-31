@@ -17,6 +17,10 @@ r.turn_around(speed=2)
 time.sleep(3)
 r.back_right(speed=4)
 
+#toggle the headlight
+r.api.set_led(1)
+r.api.set_led(0)
+
 r.head_up()
 time.sleep(2)
 r.head_middle()

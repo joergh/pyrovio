@@ -1061,7 +1061,22 @@ class RovioApi:
         """
         r = self._get_request_response('rev.cgi?Cmd=nav&action=%d&IR=%d' %
                                        (19, ir ))
-        return self._parse_response(r)
+        return self._parse_response(r)['responses']
+
+    def set_led(self, led):
+        """
+        This undocumented command sets the state if the LED.
+
+        Parameters:
+          - led:   0 off
+                  1 on
+
+        Return the response code (0 for success).
+        """
+        r = self._get_request_response('rev.cgi?Cmd=nav&action=%d&LIGHT=%d' %
+                                       (19, led ))
+        return self._parse_response(r)['responses']
+
 
     def _get_request_response(self, page):
         """
