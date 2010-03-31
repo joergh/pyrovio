@@ -5,7 +5,7 @@ import urllib2, base64
 # set up Rovio and get jpeg
 username = "mprentice"
 password = "ecitnerp"
-uri = "192.168.1.101"
+uri = "rover"
 port = 80
 url_prefix = "http://" + uri + ":" + str(port) + "/"
 jpeg_url = url_prefix + "Jpeg/CamImg.jpg"

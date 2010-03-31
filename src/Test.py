@@ -1,4 +1,4 @@
-import Rovio;
+import rovio;
 import sys
 from threading import Timer;
 
@@ -6,7 +6,7 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     # hostname, rovio name, username, password
-    karl = Rovio.Rovio('192.168.0.40','karl', 'rovio1', 'rovio1');
+    karl = rovio.Rovio('rover','rover', 'rovio1', 'rovio1');
 #    karl = Rovio.Rovio('192.168.1.102','vanessa', 'mprentice', 'ecitnerp')
 
 #    karl.getReport();

@@ -1,5 +1,6 @@
-import Rovio
+import rovio
 import wx
+import showjpeg
 
 class RovioView(wx.Frame):
     "View and control a Rovio"
@@ -7,7 +8,7 @@ class RovioView(wx.Frame):
         
         self.rovio = rovio
         
-wximg = wx.ImageFromStream(jpeg_stream, wx.BITMAP_TYPE_JPEG)
+wximg = wx.ImageFromStream(showjpeg.jpeg_stream, wx.BITMAP_TYPE_JPEG)
 wxbmp = wximg.ConvertToBitmap()
 f = wx.Frame(None, -1, "Show JPEG demo")
 f.SetSize( wxbmp.GetSize() )
