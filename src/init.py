@@ -4,4 +4,4 @@
 
 import rovio
 
-r = rovio.Rovio('rover', 'rover') 
+r = rovio.Rovio('rover') 

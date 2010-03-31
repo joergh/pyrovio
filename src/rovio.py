@@ -15,11 +15,7 @@ Handlers:
   - NullHandler: do-nothing handler for logging
 
 Module Attributes:
-  - rovios: a map of Rovio names to Rovio objects
   - rlog: logging.Logger object for logging
-
-Module Functions:
-  - getRovio: return the rovio object with the given name
 
 Module Constants:
   - __version__: The version of the PyRovio interface module as a string
@@ -184,17 +180,7 @@ response_codes = {
 # MODULE ATTRIBUTES #
 #####################
 
-rovios = dict()
-"""Map of Rovio names to interface objects"""
 rlog = logging.getLogger('rovio')
-
-####################
-# MODULE FUNCTIONS #
-####################
-
-def getRovio(name):
-    """Return the Rovio object named by name."""
-    return rovios[name]
 
 ###########
 # CLASSES #
@@ -305,7 +291,6 @@ class Rovio:
 
     Properties:
       - host:     hostname or IP address of the Rovio
-      - name:     name of this Rovio (read-only)
       - port:     HTTP port number (default 80)
       - protocol: Protocol to use (read-only, default http)
       - speed:    Default Rovio speed (1 fastest, 10 slowest, default 1)
@@ -378,19 +363,17 @@ class Rovio:
     October 8, 2008, from WowWee Group Limited.
     
     """
-    def __init__(self, name, host, username=None, password=None, port=80):
+    def __init__(self, host, username=None, password=None, port=80):
         """
         Initialize a new Rovio interface.
 
         Parameters:
-          - name:     name of this Rovio mobile webcam
           - host:     hostname or IP address
           - username: HTTP Auth name (default None)
           - password: HTTP Auth password (default None)
           - port:     HTTP port (default 80)
 
         """
-        self._name = name
         self._host = host
         self._username = username
         self._password = password
@@ -398,7 +381,6 @@ class Rovio:
         self._protocol = 'http'
         self._speed = 1
         self._compile_URLs()
-        rovios[self.name] = self
 
     # Class constants
 
@@ -453,9 +435,6 @@ class Rovio:
     password = property(get_password, set_password,
                         doc="""HTTP Auth password or None""")
     
-    def get_name(self): return self._name
-    name = property(get_name, doc="""Name of the Rovio the object represents""")
-
     def get_host(self): return self._host
     def set_host(self, value):
         if (isinstance(value, str)):
