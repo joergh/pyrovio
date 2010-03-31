@@ -83,14 +83,15 @@ import logging
 ###############
 
 # Some third-party software expects __version__
-__version__ = '0.1'
+__version__ = '0.2'
 API_VERSION = '1.2'
 API_DATE = 'October 8, 2008'
 INFO = 'PyRovio v%s ; Rovio API v%s released %s' % (__version__, API_VERSION,
                                                     API_DATE)
 AUTHORS = [{'name' : 'Mike Prentice', 'email' : 'mjp44@buffalo.edu'},
-           {'name' : 'Jon Bona', 'email' : 'jpbona@buffalo.edu'}]
-COPYRIGHT = 'Copyright (C) 2009 Jon Bona and Mike Prentice'
+           {'name' : 'Jon Bona', 'email' : 'jpbona@buffalo.edu'},
+           {'name' : 'Harry Bullen', 'email' : 'hbullen@gmail.com'}]
+COPYRIGHT = 'Copyright (C) 2009 Jon Bona and Mike Prentice 2010 Harry Bullen'
 LICENSE = 'UBPL v1.0'
 
 ####################
@@ -377,7 +378,28 @@ class Rovio:
     October 8, 2008, from WowWee Group Limited.
     
     """
-    
+    def __init__(self, name, host, username=None, password=None, port=80):
+        """
+        Initialize a new Rovio interface.
+
+        Parameters:
+          - name:     name of this Rovio mobile webcam
+          - host:     hostname or IP address
+          - username: HTTP Auth name (default None)
+          - password: HTTP Auth password (default None)
+          - port:     HTTP port (default 80)
+
+        """
+        self._name = name
+        self._host = host
+        self._username = username
+        self._password = password
+        self._port = port
+        self._protocol = 'http'
+        self._speed = 1
+        self._compile_URLs()
+        rovios[self.name] = self
+
     # Class constants
 
     # Data attributes (instance attributes)
@@ -444,30 +466,10 @@ class Rovio:
     host = property(get_host, set_host,
                     doc="""Hostname or IP address of the Rovio""")
     
-    def __init__(self, name, host, username=None, password=None, port=80):
-        """
-        Initialize a new Rovio interface.
-
-        Parameters:
-          - name:     name of this Rovio mobile webcam
-          - host:     hostname or IP address
-          - username: HTTP Auth name (default None)
-          - password: HTTP Auth password (default None)
-          - port:     HTTP port (default 80)
-
-        """
-        self._name = name
-        self._host = host
-        self._username = username
-        self._password = password
-        self._port = port
-        self._protocol = 'http'
-        self._speed = 1
-        self._compile_URLs()
-        rovios[self.name] = self
+	# Drive Functions
 
     def stop(self):
-        """Currently does nothing."""
+        """Stop in theroy. Currently does nothing."""
         return self.manual_drive(0)
 
     def forward(self, speed=None):
