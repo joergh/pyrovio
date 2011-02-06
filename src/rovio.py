@@ -11,6 +11,8 @@ Classes:
 import rovio_api 
 import math
 import time
+from threading import Thread
+import cStringIO
 
 class Rovio:
     
@@ -57,6 +59,11 @@ class Rovio:
       - head_down (camera)
       - head_middle (camera)
     """
+    
+    last_image = None
+    last_status = None
+    stream_handler = None
+    
     def __init__(self, host, username=None, password=None, port=80):
         """
         Initialize a new Rovio interface.
@@ -156,8 +163,8 @@ class Rovio:
         return self.api.manual_drive(13)
 
     # IR sensing
-    def obstacal(self):
-        """Returns True if IR detects obstacal, if ir is off returns false."""
+    def obstacle(self):
+        """Returns True if IR detects obstacle, if ir is off returns false."""
         return self.isflag(2)
 
     def ir(self):
@@ -207,7 +214,85 @@ class Rovio:
             self.api.go_home()
             time.sleep(15) # sleep 15 to let rovio get off dock
             self.api.go_home_and_dock()
-
+    
+    def get_status(self):
+        return self.api.get_status()
+    
+    def setup_stream_handler(self, status=False, image_handler=None, status_handler=None):
+        """
+        Sets up a data stream for data sent by server push (GetData.cgi). Data can be either Images
+        or Status data (See Rovio API documentation).
+        If status is True, also status data is requested and parsed. Optionally, a custom handler for images
+        and/or status data can be specified. The image handler is passed the JPEG image data stream for each image,
+        the status data handler gets the status info as a dict.
+        To use this without handler, call get_current_image() or get_current_status() 
+        """
+        if self.stream_handler != None:
+            raise "StreamHandler already running"
+        
+        class StreamHandler(Thread):
+            def __init__(self, rovio, status, image_handler, status_handler):
+                Thread.__init__(self)
+                self.rovio = rovio
+                self.status = status
+                self.image_handler = image_handler
+                self.status_handler = status_handler
+                self.shouldStop = False
+                
+            def stop(self):
+                self.shouldStop = True
+                self.join(1000)
+        
+            def run(self):
+                data=""
+                
+                response = self.rovio.api.get_data(status)
+                
+                boundary = "--" + response.info().dict["content-type"].rsplit("=")[1]
+                while(not self.shouldStop):
+                    next = response.fp.read(1024)
+                    data += next
+                    startsearch = max(len(data) - 1024 - len(boundary), 0)
+            
+                    endpos = data.find(boundary, startsearch)
+            
+                    while endpos >= 0:
+                            startpos = data.find("Content-Type")
+                            if startpos > 0 and startpos < endpos:
+                                datastart = data.find("\r\n\r\n", startpos)
+                                type = data[data.find(" ", startpos) + 1:datastart]
+                                if type == "image/jpeg":
+                                    jpeg_stream = cStringIO.StringIO(data[datastart + 4:endpos])
+                                    self.rovio.last_image = jpeg_stream
+                                    if self.image_handler != None:
+                                        self.image_handler(jpeg_stream)
+                                elif type == "text/plain":
+                                    status_stream = data[datastart + 4:endpos]
+                                    self.rovio.last_status = self.rovio.api._parse_response(status_stream)
+                                    if self.status_handler != None:
+                                        self.status_handler(self.rovio.last_status)
+                                    
+                            data = data[endpos + len(boundary):]
+                            endpos = data.find(boundary)
+               
+        t = StreamHandler(self, status, image_handler, status_handler)
+        t.start()
+        self.stream_handler = t
+        
+    def stop_stream_handler(self):
+        """stops a stream handler thread started by setup_stream_handler(), if running"""
+        if self.stream_handler != None:
+            self.stream_handler.stop()
+            self.stream_handler = None
+    
+    def get_last_image(self):
+        """returns last image received by the stream handler""" 
+        return self.last_image
+    
+    def get_last_status(self):
+        """returns last status received by the stream handler""" 
+        return self.last_status
+            
 # Note 
 # 1: Movement speed
 # 2: Turn Speed

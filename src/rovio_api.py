@@ -844,15 +844,25 @@ class RovioApi:
 
     # Other Functions
 
-    def get_data(self):
+    def get_data(self, status=False):
         """
-        Do nothing.
+        Simply sends the GetData request and returns the HTTPResponse to read streaming data. 
+        Handling is up to the user.
+        See rovio.py (getDataHandler()) for a simple handler
+        """
+        if status==True:
+            status = "true"
+        else:
+            status = "false"
+            
+        url = self._base_url + "GetData.cgi?Status=" + status
         
-        Rovio API documentation on this command is not very good.  Does nothing
-        at the moment.
-
-        """
-        return None
+        req = urllib2.Request(url)
+        req.add_header('User-Agent', USER_AGENT)
+        if self._base64string is not None:
+            req.add_header("Authorization", "Basic %s" % self._base64string)
+        f = urllib2.urlopen(req)
+        return f;
 
     def get_image(self, imgID = None):
         """
